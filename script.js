@@ -14,29 +14,37 @@ $(function() {
 			url: "http://www.omdbapi.com/",
 			type: "get",
 			dataType: "json",
-			data: {s: userInput}
+			data: {s: userInput},
+			beforeSend: function(){
+				$(".results").empty();
+				$(".posterplace").empty();
+			}
 		};
 
 		$.ajax(request).done(function(data) {
 			var searchall = data.Search
 			$.each(searchall, function(index, value) {
-				$(".results").append("<li data-imdbid>" + value["Title"] + ", " + value["Year"] + "</li>")
+				$(".results").append("<li data-imdbid=" + value["imdbID"] + ">" + value["Title"] + ", " + value["Year"] + "</li>")
 			});
 		});
 
 		$(".results").delegate("li", "click", function(e) {
-		      var imdata = $(e.target).data("data-imdbid")
-		      console.log(imdata);
-		      var request2 = {
+			  e.preventDefault();
+		      var imdata = $(e.target).data("imdbid");
+		      var poster = $.ajax({
 		        url: "http://www.omdbapi.com/",
 		        type: "get",
 		        dataType: "json",
-		        data: {i: imdata}
-		      };
-
-		      $.ajax(request2).done(function(data) {
-		      	console.log(data)
+		        async: true,
+		        data: {i: imdata},
+		        beforeSend: function(){
+		        	$(".posterplace").empty();
+		        }
 		      });
-    	});
+
+		      poster.done(function(data){
+		      	$(".posterplace").append("<img src='" + data["Poster"] + "'>")
+		      });
+		});
 	});
 });
